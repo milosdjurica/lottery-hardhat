@@ -180,4 +180,12 @@ contract Lottery is VRFConsumerBaseV2 {
 	function getRecentWinner() public view returns (address) {
 		return s_recentWinner;
 	}
+
+	function getLotteryState() public view returns (LotteryState) {
+		return s_lotteryState;
+	}
+
+	function getNumWords() public pure returns (uint) {
+		return NUM_WORDS;
+	}
 }
