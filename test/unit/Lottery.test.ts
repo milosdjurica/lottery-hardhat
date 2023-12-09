@@ -42,5 +42,13 @@ describe("Lottery", () => {
 			});
 			assert.equal(accounts[1].address, await lottery.getPlayer(0));
 		});
+
+		it("emits event after entering lottery", async () => {
+			expect(
+				await lottery.enterLottery({
+					value: TICKET_PRICE,
+				}),
+			).to.emit(lottery, "LotteryEnter");
+		});
 	});
 });
