@@ -7,6 +7,7 @@ pragma solidity ^0.8.20;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
 contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
@@ -23,6 +24,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	uint private immutable i_ticketPrice;
 	address payable[] private s_players;
+	VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
 
 	////////////////////
 	// * Events 	  //
@@ -41,10 +43,11 @@ contract Lottery is VRFConsumerBaseV2 {
 	// * Constructor  //
 	////////////////////
 	constructor(
-		address vrfCoordinator,
+		address _vrfCoordinatorV2,
 		uint _ticketPrice
-	) VRFConsumerBaseV2(vrfCoordinator) {
+	) VRFConsumerBaseV2(_vrfCoordinatorV2) {
 		i_ticketPrice = _ticketPrice;
+		i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinatorV2);
 	}
 
 	////////////////////////////
