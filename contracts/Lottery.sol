@@ -26,6 +26,7 @@ contract Lottery {
 	////////////////////
 	// * Events 	  //
 	////////////////////
+	event LotteryEnter(address indexed player);
 
 	////////////////////
 	// * Modifiers 	  //
@@ -55,6 +56,9 @@ contract Lottery {
 	////////////////////
 	function enterLottery() public payable {
 		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
+
+		s_players.push(payable(msg.sender));
+		emit LotteryEnter(msg.sender);
 	}
 
 	////////////////////
@@ -69,11 +73,11 @@ contract Lottery {
 	// * View & Pure  //
 	////////////////////
 
-	function getTicketPrice() public returns (uint) {
+	function getTicketPrice() public view returns (uint) {
 		return i_ticketPrice;
 	}
 
-	function getPlayer(uint index) public returns (address) {
+	function getPlayer(uint index) public view returns (address) {
 		return s_players[index];
 	}
 }
