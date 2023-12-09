@@ -6,8 +6,9 @@ pragma solidity ^0.8.20;
 ////////////////////
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
+import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 
-contract Lottery {
+contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	// * Errors 	  //
 	////////////////////
@@ -39,7 +40,10 @@ contract Lottery {
 	////////////////////
 	// * Constructor  //
 	////////////////////
-	constructor(uint _ticketPrice) {
+	constructor(
+		address vrfCoordinator,
+		uint _ticketPrice
+	) VRFConsumerBaseV2(vrfCoordinator) {
 		i_ticketPrice = _ticketPrice;
 	}
 
@@ -60,6 +64,13 @@ contract Lottery {
 		s_players.push(payable(msg.sender));
 		emit LotteryEnter(msg.sender);
 	}
+
+	function requestRandomWinner() external {}
+
+	function fulfillRandomWords(
+		uint requestId,
+		uint[] memory randomWords
+	) internal override {}
 
 	////////////////////
 	// * Internal 	  //
