@@ -10,7 +10,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xKEY";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "api-key";
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || "api-key";
 
-const config: HardhatUserConfig = {
+export const config: HardhatUserConfig = {
 	solidity: "0.8.20",
 	defaultNetwork: "hardhat",
 	networks: {
@@ -51,4 +51,4 @@ const config: HardhatUserConfig = {
 	},
 };
 
-export default config;
+export const developmentChains = ["hardhat", "localhost"];
