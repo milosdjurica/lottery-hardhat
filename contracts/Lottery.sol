@@ -16,6 +16,11 @@ contract Lottery is VRFConsumerBaseV2 {
 	error Lottery__NotEnoughETH();
 	error Lottery__TransferFailed();
 	error Lottery__NotOpen();
+	error Lottery__UpkeepNotNeeded(
+		uint balance,
+		uint numPlayers,
+		uint lotteryState
+	);
 
 	////////////////////
 	// * Types 		  //
@@ -39,6 +44,8 @@ contract Lottery is VRFConsumerBaseV2 {
 
 	address private s_recentWinner;
 	LotteryState s_lotteryState;
+	uint private s_lastTimeStamp;
+	uint private immutable i_interval;
 
 	////////////////////
 	// * Events 	  //
@@ -63,7 +70,8 @@ contract Lottery is VRFConsumerBaseV2 {
 		uint _ticketPrice,
 		bytes32 _gasLane,
 		uint64 _subscriptionId,
-		uint32 _callbackGasLimit
+		uint32 _callbackGasLimit,
+		uint _interval
 	) VRFConsumerBaseV2(_vrfCoordinatorV2) {
 		i_ticketPrice = _ticketPrice;
 		i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinatorV2);
@@ -71,6 +79,8 @@ contract Lottery is VRFConsumerBaseV2 {
 		i_subscriptionId = _subscriptionId;
 		i_callbackGasLimit = _callbackGasLimit;
 		s_lotteryState = LotteryState.OPEN;
+		s_lastTimeStamp = block.timestamp;
+		i_interval = _interval;
 	}
 
 	////////////////////////////
@@ -92,9 +102,26 @@ contract Lottery is VRFConsumerBaseV2 {
 		emit LotteryEnter(msg.sender);
 	}
 
-	function checkUpkeep(bytes calldata /*checkData*/) public view {}
+	function checkUpkeep(
+		bytes memory /*checkData*/
+	) public view returns (bool upkeepNeeded, bytes memory /* performData */) {
+		bool isOpen = LotteryState.OPEN == s_lotteryState;
+		bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval;
+		bool hasPlayers = s_players.length > 0;
+		bool hasBalance = address(this).balance > 0;
+		upkeepNeeded = isOpen && timePassed && hasPlayers && hasBalance;
+		return (upkeepNeeded, "0x0");
+	}
 
-	function requestRandomWinner() external {
+	function performUpkeep(bytes calldata /* performData */) external {
+		(bool upkeepNeeded, ) = checkUpkeep("");
+		if (!upkeepNeeded)
+			revert Lottery__UpkeepNotNeeded(
+				address(this).balance,
+				s_players.length,
+				uint(s_lotteryState)
+			);
+
 		s_lotteryState = LotteryState.CALCULATING;
 		uint requestId = i_vrfCoordinator.requestRandomWords(
 			i_gasLane,
@@ -115,6 +142,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		s_recentWinner = recentWinner;
 		s_lotteryState = LotteryState.OPEN;
 		delete s_players;
+		s_lastTimeStamp = block.timestamp;
 		(bool success, ) = recentWinner.call{value: address(this).balance}("");
 		if (!success) revert Lottery__TransferFailed();
 		emit WinnerPicked(recentWinner);
