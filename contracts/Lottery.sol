@@ -102,6 +102,15 @@ contract Lottery is VRFConsumerBaseV2 {
 		emit LotteryEnter(msg.sender);
 	}
 
+	/**
+	 * @dev This is the function that the Chainlink Keeper nodes call
+	 * they look for the upkeepNeeded to return true
+	 * The following should be true in order for upkeepNeeded to be true:
+	 * 1. time interval passed
+	 * 2. lottery has at least 2 players
+	 * 3. our subscription is funnded with LINK
+	 * 4. lottery should be in open state
+	 */
 	function checkUpkeep(
 		bytes memory /*checkData*/
 	) public view returns (bool upkeepNeeded, bytes memory /* performData */) {
