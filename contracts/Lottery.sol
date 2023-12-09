@@ -188,4 +188,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	function getNumWords() public pure returns (uint) {
 		return NUM_WORDS;
 	}
+
+	function getNumberOfPlayers() public view returns (uint) {
+		return s_players.length;
+	}
+
+	function getLatestTimeStamp() public view returns (uint) {
+		return s_lastTimeStamp;
+	}
+
+	function getRequestConfirmations() public pure returns (uint) {
+		return REQUEST_CONFIRMATIONS;
+	}
 }
