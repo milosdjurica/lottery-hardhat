@@ -15,10 +15,15 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	error Lottery__NotEnoughETH();
 	error Lottery__TransferFailed();
+	error Lottery__NotOpen();
 
 	////////////////////
 	// * Types 		  //
 	////////////////////
+	enum LotteryState {
+		OPEN,
+		CALCULATING
+	}
 
 	////////////////////
 	// * Variables	  //
@@ -33,6 +38,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	uint32 private constant NUM_WORDS = 1;
 
 	address private s_recentWinner;
+	LotteryState s_lotteryState;
 
 	////////////////////
 	// * Events 	  //
@@ -64,6 +70,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		i_gasLane = _gasLane;
 		i_subscriptionId = _subscriptionId;
 		i_callbackGasLimit = _callbackGasLimit;
+		s_lotteryState = LotteryState.OPEN;
 	}
 
 	////////////////////////////
@@ -79,12 +86,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	function enterLottery() public payable {
 		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
+		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
 
 		s_players.push(payable(msg.sender));
 		emit LotteryEnter(msg.sender);
 	}
 
+	function checkUpkeep(bytes calldata /*checkData*/) public view {}
+
 	function requestRandomWinner() external {
+		s_lotteryState = LotteryState.CALCULATING;
 		uint requestId = i_vrfCoordinator.requestRandomWords(
 			i_gasLane,
 			i_subscriptionId,
@@ -102,6 +113,8 @@ contract Lottery is VRFConsumerBaseV2 {
 		uint winnerIndex = randomWords[0] % s_players.length;
 		address payable recentWinner = s_players[winnerIndex];
 		s_recentWinner = recentWinner;
+		s_lotteryState = LotteryState.OPEN;
+		delete s_players;
 		(bool success, ) = recentWinner.call{value: address(this).balance}("");
 		if (!success) revert Lottery__TransferFailed();
 		emit WinnerPicked(recentWinner);
