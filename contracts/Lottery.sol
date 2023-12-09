@@ -14,6 +14,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	// * Errors 	  //
 	////////////////////
 	error Lottery__NotEnoughETH();
+	error Lottery__TransferFailed();
 
 	////////////////////
 	// * Types 		  //
@@ -31,11 +32,14 @@ contract Lottery is VRFConsumerBaseV2 {
 	uint32 private immutable i_callbackGasLimit;
 	uint32 private constant NUM_WORDS = 1;
 
+	address private s_recentWinner;
+
 	////////////////////
 	// * Events 	  //
 	////////////////////
 	event LotteryEnter(address indexed player);
 	event RequestedLotteryWinner(uint indexed requestId);
+	event WinnerPicked(address indexed winner);
 
 	////////////////////
 	// * Modifiers 	  //
@@ -92,9 +96,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	}
 
 	function fulfillRandomWords(
-		uint requestId,
+		uint, // requestId,
 		uint[] memory randomWords
-	) internal override {}
+	) internal override {
+		uint winnerIndex = randomWords[0] % s_players.length;
+		address payable recentWinner = s_players[winnerIndex];
+		s_recentWinner = recentWinner;
+		(bool success, ) = recentWinner.call{value: address(this).balance}("");
+		if (!success) revert Lottery__TransferFailed();
+		emit WinnerPicked(recentWinner);
+	}
 
 	////////////////////
 	// * Internal 	  //
@@ -114,5 +125,9 @@ contract Lottery is VRFConsumerBaseV2 {
 
 	function getPlayer(uint index) public view returns (address) {
 		return s_players[index];
+	}
+
+	function getRecentWinner() public view returns (address) {
+		return s_recentWinner;
 	}
 }
