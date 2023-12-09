@@ -25,11 +25,17 @@ contract Lottery is VRFConsumerBaseV2 {
 	uint private immutable i_ticketPrice;
 	address payable[] private s_players;
 	VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+	bytes32 private immutable i_gasLane;
+	uint64 i_subscriptionId;
+	uint16 private constant REQUEST_CONFIRMATIONS = 3;
+	uint32 private immutable i_callbackGasLimit;
+	uint32 private constant NUM_WORDS = 1;
 
 	////////////////////
 	// * Events 	  //
 	////////////////////
 	event LotteryEnter(address indexed player);
+	event RequestedLotteryWinner(uint indexed requestId);
 
 	////////////////////
 	// * Modifiers 	  //
@@ -44,10 +50,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	constructor(
 		address _vrfCoordinatorV2,
-		uint _ticketPrice
+		uint _ticketPrice,
+		bytes32 _gasLane,
+		uint64 _subscriptionId,
+		uint32 _callbackGasLimit
 	) VRFConsumerBaseV2(_vrfCoordinatorV2) {
 		i_ticketPrice = _ticketPrice;
 		i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinatorV2);
+		i_gasLane = _gasLane;
+		i_subscriptionId = _subscriptionId;
+		i_callbackGasLimit = _callbackGasLimit;
 	}
 
 	////////////////////////////
@@ -68,7 +80,16 @@ contract Lottery is VRFConsumerBaseV2 {
 		emit LotteryEnter(msg.sender);
 	}
 
-	function requestRandomWinner() external {}
+	function requestRandomWinner() external {
+		uint requestId = i_vrfCoordinator.requestRandomWords(
+			i_gasLane,
+			i_subscriptionId,
+			REQUEST_CONFIRMATIONS,
+			i_callbackGasLimit,
+			NUM_WORDS
+		);
+		emit RequestedLotteryWinner(requestId);
+	}
 
 	function fulfillRandomWords(
 		uint requestId,
