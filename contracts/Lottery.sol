@@ -106,10 +106,10 @@ contract Lottery is VRFConsumerBaseV2 {
 	 * @dev This is the function that the Chainlink Keeper nodes call
 	 * they look for the upkeepNeeded to return true
 	 * The following should be true in order for upkeepNeeded to be true:
-	 * 1. time interval passed
-	 * 2. lottery has at least 2 players
-	 * 3. our subscription is funnded with LINK
-	 * 4. lottery should be in open state
+	 * 1. lottery should be in open state
+	 * 2. time interval passed
+	 * 3. lottery has at least 1 player -> 2 makes more sense, but this is just demo
+	 * 4. our subscription is funnded with LINK
 	 */
 	function checkUpkeep(
 		bytes memory /*checkData*/
