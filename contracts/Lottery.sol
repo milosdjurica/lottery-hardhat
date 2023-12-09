@@ -11,6 +11,7 @@ contract Lottery {
 	////////////////////
 	// * Errors 	  //
 	////////////////////
+	error Lottery__NotEnoughETH();
 
 	////////////////////
 	// * Types 		  //
@@ -20,6 +21,7 @@ contract Lottery {
 	// * Variables	  //
 	////////////////////
 	uint private immutable i_ticketPrice;
+	address payable[] private s_players;
 
 	////////////////////
 	// * Events 	  //
@@ -51,6 +53,9 @@ contract Lottery {
 	////////////////////
 	// * Public 	  //
 	////////////////////
+	function enterLottery() public payable {
+		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
+	}
 
 	////////////////////
 	// * Internal 	  //
@@ -66,5 +71,9 @@ contract Lottery {
 
 	function getTicketPrice() public returns (uint) {
 		return i_ticketPrice;
+	}
+
+	function getPlayer(uint index) public returns (address) {
+		return s_players[index];
 	}
 }
