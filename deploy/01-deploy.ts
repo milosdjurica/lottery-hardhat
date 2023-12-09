@@ -7,9 +7,23 @@ const deployLottery: DeployFunction = async function (
 	const { deployer, log } = await hre.getNamedAccounts();
 	const { deploy } = hre.deployments;
 
+	let vrfCoordinatorV2;
+	const TICKET_PRICE = 20;
+	let gasLane;
+	let subscriptionId;
+	let callbackGasLimit;
+
+	const constructorArgs = [
+		vrfCoordinatorV2,
+		TICKET_PRICE,
+		gasLane,
+		subscriptionId,
+		callbackGasLimit,
+	];
+
 	const lottery = await deploy("Lottery", {
 		from: deployer,
-		args: [20], // ! constructor args
+		args: constructorArgs,
 		log: true,
 	});
 
