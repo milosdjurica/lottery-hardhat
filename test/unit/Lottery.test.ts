@@ -11,6 +11,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 			let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock;
 			const chainId = network.config.chainId!;
 			const TICKET_PRICE = networkConfig[chainId].lotteryTicketPrice;
+			const INTERVAL = networkConfig[chainId].keepersUpdateInterval;
 
 			beforeEach(async () => {
 				await deployments.fixture(["all"]);
@@ -45,10 +46,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 
 				it("Sets interval correctly", async () => {
 					const interval = await lottery.getInterval();
-					assert.equal(
-						interval.toString(),
-						networkConfig[chainId].keepersUpdateInterval,
-					);
+					assert.equal(interval.toString(), INTERVAL);
 				});
 			});
 
@@ -80,6 +78,25 @@ import { developmentChains, networkConfig } from "../../helper-config";
 							value: TICKET_PRICE,
 						}),
 					).to.emit(lottery, "LotteryEnter");
+				});
+
+				it("Doesn't allow entrance when lottery is not in OPEN STATE", async () => {
+					/**
+					 * Doing all this to make checkUpkeep return TRUE ->
+					 * that will automatically call performUpkeep -> and it will set state to CALCULATING
+					 */
+
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+					// TODO Have to add subscriptionId in order for mock to work
+					// TODO and then performUpkeep will work
+					await lottery.performUpkeep("0x");
+					await expect(
+						lottery.enterLottery({ value: TICKET_PRICE }),
+					).to.be.revertedWith("Lottery__NotOpen");
 				});
 			});
 	  });

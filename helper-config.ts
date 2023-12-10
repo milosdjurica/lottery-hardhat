@@ -21,6 +21,7 @@ export const networkConfig: NetworkConfigInfo = {
 		lotteryTicketPrice: ethers.parseEther("0.01"), // 0.01 ether
 		gasLane:
 			"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
+		// TODO ADD SUBSCRIPTION HERE IN ORDER FOR TEST -> CALCULATING STATE TO REVERT WITH NotOpen()!!!
 		subscriptionId: "0", //  !!! add subscription!!!!
 		callbackGasLimit: "500000", // 500 000
 		keepersUpdateInterval: "30",

@@ -122,6 +122,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		return (upkeepNeeded, "0x0");
 	}
 
+	// TODO Maybe will have to change it to bytes memory bcz of tests!
 	function performUpkeep(bytes calldata /* performData */) external {
 		(bool upkeepNeeded, ) = checkUpkeep("");
 		if (!upkeepNeeded)
