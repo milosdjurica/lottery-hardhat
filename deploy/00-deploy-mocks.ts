@@ -1,6 +1,6 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { developmentChains } from "../hardhat.config";
+import { developmentChains } from "../helper-config";
 import { ethers, network } from "hardhat";
 
 const BASE_FEE = ethers.parseEther("0.25"); // paying 0.25 LINK every time random numbers are requested
