@@ -12,7 +12,7 @@ const deployMock: DeployFunction = async function (
 	const { deployer } = await hre.getNamedAccounts();
 	const { deploy, log } = hre.deployments;
 
-	if (!developmentChains.includes(network.name)) {
+	if (developmentChains.includes(network.name)) {
 		console.log("Local network detected! Deploying mocks...");
 
 		await deploy("VRFCoordinatorV2Mock", {
@@ -25,9 +25,9 @@ const deployMock: DeployFunction = async function (
 		log("===============================================================");
 	}
 
-	const mock = await deploy("Mock", {
+	const mock = await deploy("VRFCoordinatorV2Mock", {
 		from: deployer,
-		args: [],
+		args: [BASE_FEE, GAS_PRICE_LINK],
 		log: true,
 	});
 
@@ -35,4 +35,4 @@ const deployMock: DeployFunction = async function (
 };
 export default deployMock;
 deployMock.id = "deployer_mock"; // id required to prevent re-execution
-deployMock.tags = ["Mock", "all"];
+deployMock.tags = ["mock", "all"];
