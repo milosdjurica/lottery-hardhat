@@ -200,4 +200,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	function getRequestConfirmations() public pure returns (uint) {
 		return REQUEST_CONFIRMATIONS;
 	}
+
+	function getVrfCoordinator()
+		public
+		view
+		returns (VRFCoordinatorV2Interface)
+	{
+		return i_vrfCoordinator;
+	}
+
+	function getInterval() public view returns (uint) {
+		return i_interval;
+	}
 }
