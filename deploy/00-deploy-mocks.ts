@@ -6,13 +6,13 @@ import { ethers, network } from "hardhat";
 const BASE_FEE = ethers.parseEther("0.25"); // paying 0.25 LINK every time random numbers are requested
 const GAS_PRICE_LINK = 1e9; // calculated value based on the gas price of the chain
 
-const deployLottery: DeployFunction = async function (
+const deployMock: DeployFunction = async function (
 	hre: HardhatRuntimeEnvironment,
 ) {
 	const { deployer } = await hre.getNamedAccounts();
 	const { deploy, log } = hre.deployments;
 
-	if (developmentChains.includes(network.name)) {
+	if (!developmentChains.includes(network.name)) {
 		console.log("Local network detected! Deploying mocks...");
 
 		await deploy("VRFCoordinatorV2Mock", {
@@ -25,14 +25,14 @@ const deployLottery: DeployFunction = async function (
 		log("===============================================================");
 	}
 
-	const lottery = await deploy("Lottery", {
+	const mock = await deploy("Mock", {
 		from: deployer,
 		args: [],
 		log: true,
 	});
 
-	console.log(`Lottery contract: `, lottery.address);
+	console.log(`Mock contract: `, mock.address);
 };
-export default deployLottery;
-deployLottery.id = "deployer_lottery"; // id required to prevent re-execution
-deployLottery.tags = ["Lottery", "all"];
+export default deployMock;
+deployMock.id = "deployer_mock"; // id required to prevent re-execution
+deployMock.tags = ["Mock", "all"];
