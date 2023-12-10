@@ -1,13 +1,13 @@
 import { ethers } from "hardhat";
 
 export type NetworkConfigItem = {
-	name?: string;
-	subscriptionId?: string;
-	gasLane?: string;
-	keepersUpdateInterval?: string;
-	lotteryTicketPrice?: bigint;
-	callbackGasLimit?: string;
+	name: string;
 	vrfCoordinatorV2?: string;
+	lotteryTicketPrice: bigint;
+	gasLane: string;
+	subscriptionId?: string;
+	callbackGasLimit: string;
+	keepersUpdateInterval: string;
 };
 
 export type NetworkConfigInfo = {

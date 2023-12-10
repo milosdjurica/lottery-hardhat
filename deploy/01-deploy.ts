@@ -3,8 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { developmentChains, networkConfig } from "../helper-config";
 import { ethers, network } from "hardhat";
 import { VRFCoordinatorV2Mock } from "../typechain-types";
-
-const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
+import { verify } from "../utils/verify";
 
 const deployLottery: DeployFunction = async function (
 	hre: HardhatRuntimeEnvironment,
@@ -13,6 +12,12 @@ const deployLottery: DeployFunction = async function (
 	const { deploy, log } = hre.deployments;
 	const chainId = network.config.chainId!;
 
+	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
+
+	const TICKET_PRICE = networkConfig[chainId].lotteryTicketPrice;
+	const gasLane = networkConfig[chainId].gasLane;
+	const callbackGasLimit = networkConfig[chainId].callbackGasLimit;
+	const interval = networkConfig[chainId].keepersUpdateInterval;
 	let vrfCoordinatorV2Address: string;
 	let subscriptionId: string;
 
@@ -34,11 +39,6 @@ const deployLottery: DeployFunction = async function (
 		subscriptionId = networkConfig[chainId].subscriptionId!;
 	}
 
-	const TICKET_PRICE = networkConfig[chainId].lotteryTicketPrice;
-	const gasLane = networkConfig[chainId].gasLane;
-	const callbackGasLimit = networkConfig[chainId].callbackGasLimit;
-	const interval = networkConfig[chainId].keepersUpdateInterval;
-
 	const constructorArgs = [
 		vrfCoordinatorV2Address,
 		TICKET_PRICE,
@@ -56,7 +56,16 @@ const deployLottery: DeployFunction = async function (
 	});
 
 	log(`Lottery contract: `, lottery.address);
-	log("==============================================================");
+	log("===============================================================");
+
+	if (
+		!developmentChains.includes(network.name) &&
+		process.env.ETHERSCAN_API_KEY
+	) {
+		log("Verifying contract....");
+		await verify(lottery.address, constructorArgs);
+	}
+	log("===============================================================");
 };
 export default deployLottery;
 deployLottery.id = "deployer_lottery"; // id required to prevent re-execution
