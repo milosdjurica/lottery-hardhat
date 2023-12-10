@@ -52,20 +52,20 @@ import { developmentChains, networkConfig } from "../../helper-config";
 				});
 			});
 
-			describe("enterLottery", () => {
-				it("reverts if called without money", async () => {
+			describe("EnterLottery Function", () => {
+				it("Reverts if called without money", async () => {
 					await expect(lottery.enterLottery()).to.be.revertedWithCustomError(
 						lottery,
 						"Lottery__NotEnoughETH",
 					);
 				});
-				it("reverts if not enough money", async () => {
+				it("Reverts if not enough money", async () => {
 					await expect(
 						lottery.enterLottery({ value: TICKET_PRICE / BigInt(2) }),
 					).to.be.revertedWithCustomError(lottery, "Lottery__NotEnoughETH");
 				});
 
-				it("adds to array of players", async () => {
+				it("Adds to array of players", async () => {
 					const accounts = await ethers.getSigners();
 					const lotteryConnected = lottery.connect(accounts[1]);
 					await lotteryConnected.enterLottery({
@@ -74,7 +74,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					assert.equal(accounts[1].address, await lottery.getPlayer(0));
 				});
 
-				it("emits LotteryEnter event after entering lottery", async () => {
+				it("Emits LotteryEnter event after entering lottery", async () => {
 					expect(
 						await lottery.enterLottery({
 							value: TICKET_PRICE,
