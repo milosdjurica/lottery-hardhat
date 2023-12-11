@@ -2,6 +2,7 @@ import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
 import { developmentChains, networkConfig } from "../../helper-config";
+import { ContractTransactionReceipt, EventLog } from "ethers";
 
 !developmentChains.includes(network.name)
 	? describe.skip
@@ -181,7 +182,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					await network.provider.send("evm_mine", []);
 					const txResponse = await lottery.performUpkeep("0x");
 					const txReceipt = await txResponse.wait(1);
-					const requestId = txReceipt?.logs[1].args.requestId;
+					const requestId = (txReceipt?.logs[1] as EventLog).args.requestId;
 					// console.log("requestId", requestId);
 					assert(Number(requestId) > 0);
 				});
@@ -227,6 +228,10 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					// performUpkeep (mock being chainlink keepers)
 					// fulfillRandomWords (mock being chainlink VRF)
 					// have to wait for the fulfillRandomWords to be called
+					// ! Uncomment code below
+					// await new Promise(async (resolve, reject) => {
+					// 	lottery.once("WinnerPicked", () => {});
+					// });
 				});
 			});
 	  });
