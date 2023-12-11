@@ -133,5 +133,15 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
 					assert(!upkeepNeeded);
 				});
+
+				it("Returns true if all conditions are fulfilled", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
+					assert(upkeepNeeded);
+				});
 			});
 	  });
