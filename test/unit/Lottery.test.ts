@@ -229,9 +229,47 @@ import { ContractTransactionReceipt, EventLog } from "ethers";
 					// fulfillRandomWords (mock being chainlink VRF)
 					// have to wait for the fulfillRandomWords to be called
 					// ! Uncomment code below
-					// await new Promise(async (resolve, reject) => {
-					// 	lottery.once("WinnerPicked", () => {});
-					// });
+					let winner: any;
+					console.log("winner", winner);
+					await new Promise<void>(async (resolve, reject) => {
+						lottery.once(winner, async () => {
+							console.log("Winner picked event is fired!");
+							try {
+								const recentWinner = await lottery.getRecentWinner();
+								console.log("recentWinner", recentWinner);
+								const lotteryState = await lottery.getLotteryState();
+								const endingTimeStamp = await lottery.getLatestTimeStamp();
+								const winnerEndBalance = await ethers.provider.getBalance(
+									accounts[1].address,
+								);
+
+								await expect(lottery.getPlayer(0)).to.be.reverted;
+								assert.equal(recentWinner.toString(), accounts[2].address);
+								assert.equal(Number(lotteryState), 0);
+								assert(endingTimeStamp > startingTimestamp);
+
+								assert.equal(
+									Number(winnerEndBalance),
+									Number(winnerStartBalance) +
+										Number(TICKET_PRICE) * participants +
+										Number(TICKET_PRICE),
+								);
+								resolve();
+							} catch (error) {
+								reject(error);
+							}
+						});
+
+						const tx = await lottery.performUpkeep("0x");
+						const txReceipt = await tx.wait(1);
+						const winnerStartBalance = await ethers.provider.getBalance(
+							accounts[1].address,
+						);
+						await vrfCoordinatorV2Mock.fulfillRandomWords(
+							(txReceipt?.logs[1] as EventLog).args.requestId,
+							lottery.getAddress(),
+						);
+					});
 				});
 			});
 	  });
