@@ -123,5 +123,15 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					assert.equal(lotteryState.toString(), "1");
 					assert.equal(upkeepNeeded, false);
 				});
+
+				it("Returns false if not enough time has passed", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) - 2,
+					]);
+					await network.provider.send("evm_mine", []);
+					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
+					assert(!upkeepNeeded);
+				});
 			});
 	  });
