@@ -109,5 +109,19 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
 					assert(!upkeepNeeded);
 				});
+
+				it("Returns false if lottery isn't in OPEN STATE", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+
+					await lottery.performUpkeep("0x");
+					const lotteryState = await lottery.getLotteryState();
+					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
+					assert.equal(lotteryState.toString(), "1");
+					assert.equal(upkeepNeeded, false);
+				});
 			});
 	  });
