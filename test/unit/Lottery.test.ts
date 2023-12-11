@@ -182,7 +182,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					const txResponse = await lottery.performUpkeep("0x");
 					const txReceipt = await txResponse.wait(1);
 					const requestId = txReceipt?.logs[1].args.requestId;
-					console.log("requestId", requestId);
+					// console.log("requestId", requestId);
 					assert(Number(requestId) > 0);
 				});
 			});
@@ -196,12 +196,37 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					await network.provider.send("evm_mine", []);
 				});
 
-				it("Can only be called after performUpkeep", async () => {
+				it("Can not be called before performUpkeep", async () => {
 					// ! Cant add revertedWithCustomError(vrfC...V2Mock, "nonexistent request")
 					// ! Because contract error comes from chainlink contract
 					await expect(
 						vrfCoordinatorV2Mock.fulfillRandomWords(0, lottery.getAddress()),
 					).to.be.revertedWith("nonexistent request");
+					// ! Should be fuzz testing
+					await expect(
+						vrfCoordinatorV2Mock.fulfillRandomWords(1, lottery.getAddress()),
+					).to.be.revertedWith("nonexistent request");
+				});
+
+				it("Picks a winner, resets the lottery and sends money", async () => {
+					const participants = 3;
+					const startingAccIndex = 1; // deployer = 1
+					const accounts = await ethers.getSigners();
+
+					for (
+						let i = startingAccIndex;
+						i < startingAccIndex + participants;
+						i++
+					) {
+						const accConnected = lottery.connect(accounts[i]);
+						await accConnected.enterLottery({ value: TICKET_PRICE });
+					}
+
+					const startingTimestamp = await lottery.getLatestTimeStamp();
+
+					// performUpkeep (mock being chainlink keepers)
+					// fulfillRandomWords (mock being chainlink VRF)
+					// have to wait for the fulfillRandomWords to be called
 				});
 			});
 	  });
