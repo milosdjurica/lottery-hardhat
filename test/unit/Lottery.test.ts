@@ -94,9 +94,9 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					// TODO Have to add subscriptionId in order for mock to work
 					// TODO and then performUpkeep will work
 					await lottery.performUpkeep("0x");
-					// ! This passes, but it does NOT revert with my error Lottery__NotOpen();
-					await expect(lottery.enterLottery({ value: TICKET_PRICE })).to.be
-						.reverted;
+					await expect(
+						lottery.enterLottery({ value: TICKET_PRICE }),
+					).to.be.revertedWithCustomError(lottery, "Lottery__NotOpen");
 				});
 			});
 
@@ -142,6 +142,24 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					await network.provider.send("evm_mine", []);
 					const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
 					assert(upkeepNeeded);
+				});
+			});
+
+			describe("PerformUpkeep", () => {
+				it("only run if checkUpkeep is true", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+					const tx = await lottery.performUpkeep("0x");
+					assert(tx);
+				});
+
+				it("reverts if checkUpkeep is false", async () => {
+					await expect(
+						lottery.performUpkeep("0x"),
+					).to.be.revertedWithCustomError(lottery, "Lottery__UpkeepNotNeeded");
 				});
 			});
 	  });
