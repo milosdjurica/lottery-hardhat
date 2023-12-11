@@ -1,15 +1,16 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { developmentChains, networkConfig } from "../helper-config";
-import { ethers, network } from "hardhat";
 import { VRFCoordinatorV2Mock } from "../typechain-types";
 import { verify } from "../utils/verify";
+import { EventLog } from "ethers";
 
 const deployLottery: DeployFunction = async function (
 	hre: HardhatRuntimeEnvironment,
 ) {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy, log } = hre.deployments;
+	const { deployments, getNamedAccounts, network, ethers } = hre;
+	const { deployer } = await getNamedAccounts();
+	const { deploy, log } = deployments;
 	const chainId = network.config.chainId!;
 
 	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
@@ -27,8 +28,7 @@ const deployLottery: DeployFunction = async function (
 		vrfCoordinatorV2Address = await vrfCoordinatorV2Mock.getAddress();
 		const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
 		const transactionReceipt = await transactionResponse.wait(1);
-		//@ts-ignore
-		subscriptionId = await transactionReceipt?.logs[0].args.subId;
+		subscriptionId = await (transactionReceipt?.logs[0] as EventLog).args.subId;
 		await vrfCoordinatorV2Mock.fundSubscription(
 			subscriptionId,
 			VRF_SUB_FUND_AMOUNT,

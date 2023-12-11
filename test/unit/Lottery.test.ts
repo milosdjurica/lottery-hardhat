@@ -2,7 +2,7 @@ import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
 import { developmentChains, networkConfig } from "../../helper-config";
-import { ContractTransactionReceipt, EventLog } from "ethers";
+import { EventLog } from "ethers";
 
 !developmentChains.includes(network.name)
 	? describe.skip
