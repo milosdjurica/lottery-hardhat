@@ -113,7 +113,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	 */
 	function checkUpkeep(
 		bytes memory /*checkData*/
-	) public view returns (bool upkeepNeeded, bytes memory /* performData */) {
+	) public returns (bool upkeepNeeded, bytes memory /* performData */) {
 		bool isOpen = LotteryState.OPEN == s_lotteryState;
 		bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval;
 		bool hasPlayers = s_players.length > 0;
