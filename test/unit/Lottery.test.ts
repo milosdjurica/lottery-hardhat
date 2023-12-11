@@ -186,4 +186,22 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					assert(Number(requestId) > 0);
 				});
 			});
+
+			describe("FulfillRandomWords", () => {
+				beforeEach(async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+				});
+
+				it("Can only be called after performUpkeep", async () => {
+					// ! Cant add revertedWithCustomError(vrfC...V2Mock, "nonexistent request")
+					// ! Because contract error comes from chainlink contract
+					await expect(
+						vrfCoordinatorV2Mock.fulfillRandomWords(0, lottery.getAddress()),
+					).to.be.revertedWith("nonexistent request");
+				});
+			});
 	  });
