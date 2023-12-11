@@ -19,7 +19,7 @@ const deployLottery: DeployFunction = async function (
 	const callbackGasLimit = networkConfig[chainId].callbackGasLimit;
 	const interval = networkConfig[chainId].keepersUpdateInterval;
 	let vrfCoordinatorV2Address: string;
-	let subscriptionId: string;
+	let subscriptionId: string = networkConfig[chainId].subscriptionId;
 	let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock;
 
 	if (developmentChains.includes(network.name)) {
@@ -35,8 +35,12 @@ const deployLottery: DeployFunction = async function (
 		);
 	} else {
 		vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2!;
-		subscriptionId = networkConfig[chainId].subscriptionId!;
+		subscriptionId = networkConfig[chainId].subscriptionId;
 	}
+
+	const waitBlockConfirmations = developmentChains.includes(network.name)
+		? 1
+		: 3;
 
 	const constructorArgs = [
 		vrfCoordinatorV2Address,
@@ -52,6 +56,7 @@ const deployLottery: DeployFunction = async function (
 		from: deployer,
 		args: constructorArgs,
 		log: true,
+		waitConfirmations: waitBlockConfirmations,
 	});
 
 	log(`Lottery contract: `, lottery.address);

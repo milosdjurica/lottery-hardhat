@@ -1,11 +1,13 @@
 import { ethers } from "hardhat";
 
+const SUBSCRIPTION_ID = process.env.SUBSCRIPTION_ID!;
+
 export type NetworkConfigItem = {
 	name: string;
 	vrfCoordinatorV2?: string;
 	lotteryTicketPrice: bigint;
 	gasLane: string;
-	subscriptionId?: string;
+	subscriptionId: string;
 	callbackGasLimit: string;
 	keepersUpdateInterval: string;
 };
@@ -22,7 +24,7 @@ export const networkConfig: NetworkConfigInfo = {
 		gasLane:
 			"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
 		// TODO ADD SUBSCRIPTION HERE IN ORDER FOR TEST -> CALCULATING STATE TO REVERT WITH NotOpen()!!!
-		subscriptionId: "0", //  !!! add subscription!!!!
+		subscriptionId: SUBSCRIPTION_ID, //  !!! add subscription!!!!
 		callbackGasLimit: "500000", // 500 000
 		keepersUpdateInterval: "30",
 	},
@@ -31,6 +33,7 @@ export const networkConfig: NetworkConfigInfo = {
 		lotteryTicketPrice: ethers.parseEther("0.01"), // 0.01 ether
 		gasLane:
 			"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
+		subscriptionId: SUBSCRIPTION_ID,
 		callbackGasLimit: "500000", // 500 000
 		keepersUpdateInterval: "30",
 	},

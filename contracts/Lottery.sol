@@ -153,9 +153,9 @@ contract Lottery is VRFConsumerBaseV2 {
 		s_lotteryState = LotteryState.OPEN;
 		delete s_players;
 		s_lastTimeStamp = block.timestamp;
+		emit WinnerPicked(recentWinner);
 		(bool success, ) = recentWinner.call{value: address(this).balance}("");
 		if (!success) revert Lottery__TransferFailed();
-		emit WinnerPicked(recentWinner);
 	}
 
 	////////////////////

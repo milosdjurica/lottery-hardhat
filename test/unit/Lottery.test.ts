@@ -93,7 +93,7 @@ import { developmentChains, networkConfig } from "../../helper-config";
 					await network.provider.send("evm_mine", []);
 					// TODO Have to add subscriptionId in order for mock to work
 					// TODO and then performUpkeep will work
-					await lottery.performUpkeep("0x");
+					await lottery.performUpkeep("");
 					await expect(
 						lottery.enterLottery({ value: TICKET_PRICE }),
 					).to.be.revertedWith("Lottery__NotOpen");
