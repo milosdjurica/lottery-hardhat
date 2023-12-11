@@ -161,5 +161,29 @@ import { developmentChains, networkConfig } from "../../helper-config";
 						lottery.performUpkeep("0x"),
 					).to.be.revertedWithCustomError(lottery, "Lottery__UpkeepNotNeeded");
 				});
+
+				it("updates the lottery state", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+					const txResponse = await lottery.performUpkeep("0x");
+					const txReceipt = await txResponse.wait(1);
+					assert.equal(Number(await lottery.getLotteryState()), 1);
+				});
+
+				it("emits the event", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await network.provider.send("evm_increaseTime", [
+						Number(INTERVAL) + 1,
+					]);
+					await network.provider.send("evm_mine", []);
+					const txResponse = await lottery.performUpkeep("0x");
+					const txReceipt = await txResponse.wait(1);
+					const requestId = txReceipt?.logs[1].args.requestId;
+					console.log("requestId", requestId);
+					assert(Number(requestId) > 0);
+				});
 			});
 	  });
