@@ -19,7 +19,7 @@ const deployLottery: DeployFunction = async function (
 	const callbackGasLimit = networkConfig[chainId].callbackGasLimit;
 	const interval = networkConfig[chainId].keepersUpdateInterval;
 	let vrfCoordinatorV2Address: string;
-	let subscriptionId: string = networkConfig[chainId].subscriptionId;
+	let subscriptionId = networkConfig[chainId].subscriptionId;
 	let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock;
 
 	if (developmentChains.includes(network.name)) {
@@ -69,6 +69,10 @@ const deployLottery: DeployFunction = async function (
 		log("Verifying contract....");
 		await verify(lottery.address, constructorArgs);
 	} else {
+		// ! Check for TypeScript linter
+		if (!vrfCoordinatorV2Mock!)
+			vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
+
 		await vrfCoordinatorV2Mock.addConsumer(subscriptionId, lottery.address);
 	}
 	log("===============================================================");
